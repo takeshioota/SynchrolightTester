@@ -1,0 +1,33 @@
+<Window x:Class="SynchrolightTester.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Synchrolight Tester (WPF)" Height="680" Width="900"
+        FontFamily="Yu Gothic UI" FontSize="14">
+    <DockPanel>
+
+        <!-- 接続バー（全画面共通・常設） -->
+        <Border DockPanel.Dock="Top" Background="#1F2933" Padding="14,10">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="SynchrolightTester" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock x:Name="VersionText" Text="Ver.：1.0.0" Foreground="#9AA5B1" FontSize="12"
+                               VerticalAlignment="Bottom" Margin="10,0,0,2"/>
+                </StackPanel>
+                <StackPanel x:Name="ConnBarControls" Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button x:Name="BtnStartApi" Content="API起動" Margin="0,0,14,0" Padding="12,3" Click="OnStartApi"
+                            ToolTip="SynchrolightAPI(:5100) を起動します。先に起動済みなら流用します。"/>
+                    <TextBlock Text="COMポート:" Foreground="#CBD2D9" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="PortsCombo" Width="130" VerticalContentAlignment="Center"/>
+                    <Button x:Name="BtnScan" Content="再取得" Margin="6,0,0,0" Padding="12,3" Click="OnScan"/>
+                    <Button x:Name="BtnConnect" Content="接続＋初期化" Margin="12,0,0,0" Padding="12,3" Click="OnConnect"/>
+                    <Ellipse x:Name="ConnDot" Width="12" Height="12" Fill="#9AA5B1" Margin="16,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="ConnStatus" Foreground="#CBD2D9" VerticalAlignment="Center" Text="未接続"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 画面切替 -->
+        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+
+    </DockPanel>
+</Window>

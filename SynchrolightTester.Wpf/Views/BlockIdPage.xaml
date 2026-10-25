@@ -1,0 +1,59 @@
+<Page x:Class="SynchrolightTester.Wpf.Views.BlockIdPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="ブロックID操作確認" Background="#F5F7FA">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+
+            <!-- ヘッダ（タイトルと戻るは従来どおり上段） -->
+            <DockPanel Margin="0,0,0,16">
+                <Button Content="◀ メニューへ戻る" DockPanel.Dock="Right" Padding="12,5" Click="OnBack"/>
+                <TextBlock Text="ブロックID操作確認" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            </DockPanel>
+
+            <!-- 点灯色選択以下はウィンドウ中央に寄せる -->
+            <StackPanel HorizontalAlignment="Center" Width="760">
+
+                <!-- 点灯色選択（グループ点灯で使用） -->
+                <TextBlock Text="点灯色選択（グループ点灯で使用）"
+                           FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,18">
+                    <Button x:Name="BtnBlue"  Content="青" Style="{StaticResource ColorButton}" Background="#1E88E5" Click="OnColor"/>
+                    <Button x:Name="BtnGreen" Content="緑" Style="{StaticResource ColorButton}" Background="#43A047" Click="OnColor"/>
+                    <Button x:Name="BtnRed"   Content="赤" Style="{StaticResource ColorButton}" Background="#E53935" Click="OnColor"/>
+                </StackPanel>
+
+                <!-- 機能（排他） -->
+                <TextBlock Text="機能（各機能は排他。選択時は一旦全消灯してから実行。ブロックIDエリアの値で制御）"
+                           FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <WrapPanel HorizontalAlignment="Center">
+                    <Button Content="グループ1点灯"        Style="{StaticResource FuncButton}" Click="OnGroup1"/>
+                    <Button Content="グループ2点灯"        Style="{StaticResource FuncButton}" Click="OnGroup2"/>
+                    <!-- レインボー: 端末のレインボー用ブロックIDエリア(7)書込み済みを 2026-10-19 実機確認（固定/シフトとも7色点灯OK）→表示(Visible)。
+                         実装は DemoRunner.RainbowAsync/RainbowShiftAsync。 -->
+                    <Button Content="レインボー点灯(固定)"  Style="{StaticResource FuncButton}" Click="OnRainbow"      Visibility="Visible"/>
+                    <Button Content="レインボー点灯(シフト)" Style="{StaticResource FuncButton}" Click="OnRainbowShift" Visibility="Visible"/>
+                    <Button Content="消灯"                 Style="{StaticResource OffButton}"  Click="OnOff"/>
+                </WrapPanel>
+
+                <!-- レインボー凡例（レインボー2ボタンと共に表示） -->
+                <Border Background="White" BorderBrush="#D9E2EC" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,4,0,0" Visibility="Visible">
+                    <StackPanel>
+                        <TextBlock Text="レインボー固定7色（ブロックIDエリア7＝7進法割当。値1〜7をAC/ブロック制御で点灯）。固定=レベル1（各値に対応色で点灯・保持）／シフト=レベル2（約0.5秒間隔で発光色を順次シフト）"
+                                   Foreground="#52606D" FontSize="12" Margin="0,0,0,6" TextWrapping="Wrap"/>
+                        <StackPanel x:Name="RainbowLegend" Orientation="Horizontal"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 状態・ログ -->
+                <Border Background="White" BorderBrush="#D9E2EC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,12,0,0">
+                    <StackPanel>
+                        <TextBlock x:Name="StatusText" Text="待機中" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <ListBox x:Name="LogList" Height="100" BorderThickness="0" FontFamily="Consolas" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

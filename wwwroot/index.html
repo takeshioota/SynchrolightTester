@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ID書込み済端末 動作デモ — Synchrolight Tester</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>ID書込み済端末 動作デモ</h1>
+      <div class="sub">Synchrolight Tester</div>
+    </div>
+    <nav class="nav">
+      <a href="/index.html" data-page="home">ホーム</a>
+      <a href="/id.html" data-page="id">行ID制御テスト</a>
+      <a href="/block.html" data-page="block">ブロックID制御テスト</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="panel">
+      <h2>概要</h2>
+      <p class="hint">
+        ID書込み済シンクロライト（端末）が ID 個別に操作できることの確認用ソフトです。
+        端末へ ID（範囲：001〜200）が事前に書込まれていることが前提です。
+        テスト画面は「行ID制御（①〜⑤）」と「ブロックID制御（⑥〜⑧）」に分かれています。
+      </p>
+    </div>
+
+    <div id="conn"></div>
+
+    <div class="cards">
+      <a class="card" href="/id.html">
+        <div class="k">行ID制御</div>
+        <div class="ttl">ID用テスト画面</div>
+        <div class="hint">行ID（001〜200）単位で端末を制御します。</div>
+        <ul>
+          <li>① 色指定（赤 / 緑 / 青）</li>
+          <li>② 連続点灯（順次点灯・継続）</li>
+          <li>③ 連続点滅（順次移動）</li>
+          <li>④ 奇数点灯 / ⑤ 偶数点灯</li>
+        </ul>
+      </a>
+      <a class="card" href="/block.html">
+        <div class="k">ブロックID制御</div>
+        <div class="ttl">ブロック用テスト画面</div>
+        <div class="hint">ブロックIDエリアの値で端末をまとめて制御します。</div>
+        <ul>
+          <li>⑥ グループ1点灯（エリア8＝1）</li>
+          <li>⑦ グループ2点灯（エリア8＝2）</li>
+          <li>⑧ レインボー点灯（エリア6＝1〜7）</li>
+        </ul>
+      </a>
+    </div>
+
+    <div class="panel" style="margin-top:1.2rem">
+      <h2>実行状態</h2>
+      <div id="running" class="running"></div>
+      <div id="log" class="log"></div>
+    </div>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script>
+    markNav('home');
+    initLog(document.getElementById('log'));
+    renderConnectionBar(document.getElementById('conn'));
+    initRunning(document.getElementById('running'));
+  </script>
+</body>
+</html>

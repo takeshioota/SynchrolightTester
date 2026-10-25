@@ -1,0 +1,33 @@
+<Application x:Class="SynchrolightTester.Wpf.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+
+        <!-- 色選択ボタン（背景色は各ボタン側で指定、選択時は BorderBrush を濃色に） -->
+        <Style x:Key="ColorButton" TargetType="Button">
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="3"/>
+        </Style>
+
+        <!-- 機能ボタン -->
+        <Style x:Key="FuncButton" TargetType="Button">
+            <Setter Property="MinWidth" Value="170"/>
+            <Setter Property="Height" Value="62"/>
+            <Setter Property="Margin" Value="0,0,10,10"/>
+            <Setter Property="FontSize" Value="15"/>
+        </Style>
+
+        <!-- 消灯ボタン -->
+        <Style x:Key="OffButton" TargetType="Button" BasedOn="{StaticResource FuncButton}">
+            <Setter Property="Background" Value="#C62828"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+    </Application.Resources>
+</Application>

@@ -1,0 +1,56 @@
+<Page x:Class="SynchrolightTester.Wpf.Views.RowIdPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="行ID操作確認" Background="#F5F7FA">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+
+            <!-- ヘッダ（タイトルと戻るは従来どおり上段） -->
+            <DockPanel Margin="0,0,0,16">
+                <Button Content="◀ メニューへ戻る" DockPanel.Dock="Right" Padding="12,5" Click="OnBack"/>
+                <TextBlock Text="行ID操作確認" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            </DockPanel>
+
+            <!-- 点灯色選択以下はウィンドウ中央に寄せる -->
+            <StackPanel HorizontalAlignment="Center" Width="760">
+
+                <!-- 点灯色選択 -->
+                <TextBlock Text="点灯色選択（色を選んでから機能ボタンを押してください）" FontWeight="Bold"
+                           HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,18">
+                    <Button x:Name="BtnBlue"  Content="青" Style="{StaticResource ColorButton}" Background="#1E88E5" Click="OnColor"/>
+                    <Button x:Name="BtnGreen" Content="緑" Style="{StaticResource ColorButton}" Background="#43A047" Click="OnColor"/>
+                    <Button x:Name="BtnRed"   Content="赤" Style="{StaticResource ColorButton}" Background="#E53935" Click="OnColor"/>
+                </StackPanel>
+
+                <!-- 対象端末数 -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,18" VerticalAlignment="Center">
+                    <TextBlock Text="対象端末数：" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBox x:Name="CountBox" Text="200" Width="80" VerticalContentAlignment="Center"
+                             TextAlignment="Right" Padding="4,2"/>
+                    <TextBlock Text="（1〜200, max200）" Foreground="#52606D" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- 機能（排他） -->
+                <TextBlock Text="機能（各機能は排他。選択時は一旦全消灯してから実行）" FontWeight="Bold"
+                           HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <WrapPanel HorizontalAlignment="Center">
+                    <Button Content="連続点灯"  Style="{StaticResource FuncButton}" Click="OnSeqOn"/>
+                    <Button Content="連続点滅"  Style="{StaticResource FuncButton}" Click="OnSeqBlink"/>
+                    <Button Content="奇数点灯"  Style="{StaticResource FuncButton}" Click="OnOdd"/>
+                    <Button Content="偶数点灯"  Style="{StaticResource FuncButton}" Click="OnEven"/>
+                    <Button Content="消灯"      Style="{StaticResource OffButton}"  Click="OnOff"/>
+                </WrapPanel>
+
+                <!-- 状態・ログ -->
+                <Border Background="White" BorderBrush="#D9E2EC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,12,0,0">
+                    <StackPanel>
+                        <TextBlock x:Name="StatusText" Text="待機中" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <ListBox x:Name="LogList" Height="100" BorderThickness="0" FontFamily="Consolas" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

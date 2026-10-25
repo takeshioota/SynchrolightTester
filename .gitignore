@@ -1,0 +1,11 @@
+bin/
+obj/
+*.user
+.vs/
+logs/
+
+# ビルド成果物（配布ZIP・self-contained 出力。約1.5GB。配布物は GitHub Releases 等で共有）
+dist/
+
+# 削除済み BLE ID書込み機能の参照資料（外部ツール .exe 等・約73MB）
+doument/ID書き込み/

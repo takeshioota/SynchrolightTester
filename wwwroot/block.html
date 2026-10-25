@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ブロックID制御テスト — Synchrolight Tester</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>ブロックID制御テスト</h1>
+      <div class="sub">ID書込み済端末 動作デモ ⑥〜⑧</div>
+    </div>
+    <nav class="nav">
+      <a href="/index.html" data-page="home">ホーム</a>
+      <a href="/id.html" data-page="id">行ID制御テスト</a>
+      <a href="/block.html" data-page="block">ブロックID制御テスト</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div id="conn"></div>
+
+    <!-- 色指定（グループ点灯で使用） -->
+    <div class="panel">
+      <h2>色指定 <span class="tag">グループ点灯で使用</span></h2>
+      <p class="hint">⑥⑦ グループ点灯で使う色を選択します。⑧ レインボーは固定7色のため、この選択は使用しません。</p>
+      <div id="colorPicker"></div>
+    </div>
+
+    <!-- ブロックID制御 ⑥〜⑧ -->
+    <div class="panel">
+      <h2>ブロックID制御 <span class="tag">ブロックIDエリア</span></h2>
+      <p class="hint">端末に書込まれたブロックIDエリアの値でまとめて制御します（コマンド AC）。</p>
+      <div class="tiles">
+        <button class="tile" id="btnGroup1">
+          <span class="num">⑥</span><span class="ttl">グループ1点灯</span>
+          <span class="desc">ブロックIDエリア8 = 1 の端末のみ点灯</span>
+        </button>
+        <button class="tile" id="btnGroup2">
+          <span class="num">⑦</span><span class="ttl">グループ2点灯</span>
+          <span class="desc">ブロックIDエリア8 = 2 の端末のみ点灯</span>
+        </button>
+        <button class="tile" id="btnRainbow">
+          <span class="num">⑧</span><span class="ttl">レインボー点灯</span>
+          <span class="desc">ブロックIDエリア6（1〜7）に固定7色を割当て</span>
+        </button>
+      </div>
+
+      <div style="margin-top:1rem">
+        <div class="hint">⑧ レインボー 固定7色（ブロックIDエリア6 の値＝1〜7, 7進法割当）</div>
+        <div class="legend" id="rainbowLegend"></div>
+      </div>
+    </div>
+
+    <!-- 共通操作 -->
+    <div class="panel">
+      <h2>共通操作</h2>
+      <div class="tiles">
+        <button class="tile warn" id="btnBlink">
+          <span class="num">●</span><span class="ttl">点滅</span>
+          <span class="desc">選択色で全体を点滅（0.5秒点灯/0.5秒消灯）</span>
+        </button>
+        <button class="tile danger" id="btnOff">
+          <span class="num">■</span><span class="ttl">全消灯</span>
+          <span class="desc">実行中デモを停止し全消灯</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 状態 -->
+    <div class="panel">
+      <h2>実行状態</h2>
+      <div id="running" class="running"></div>
+      <div id="log" class="log"></div>
+    </div>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script>
+    markNav('block');
+    initLog(document.getElementById('log'));
+    renderConnectionBar(document.getElementById('conn'));
+    renderColorPicker(document.getElementById('colorPicker'));
+    initRunning(document.getElementById('running'));
+
+    // レインボー凡例
+    const rainbow = [
+      ['1', '青', '#0000ff'], ['2', '赤', '#ff0000'], ['3', '黄', '#ffff00'],
+      ['4', '緑', '#00ff00'], ['5', 'オレンジ', '#ffa500'], ['6', '水色', '#00ffff'], ['7', '紫', '#800080'],
+    ];
+    document.getElementById('rainbowLegend').innerHTML = rainbow.map(([n, name, css]) =>
+      `<span class="item"><span class="sw" style="background:${css}"></span>${n}:${name}</span>`).join('');
+
+    document.getElementById('btnGroup1').addEventListener('click', (e) =>
+      runDemo(e.currentTarget, 'グループ1点灯', () => api('/api/demo/group', { body: { group: 1, color: currentColor() } })));
+
+    document.getElementById('btnGroup2').addEventListener('click', (e) =>
+      runDemo(e.currentTarget, 'グループ2点灯', () => api('/api/demo/group', { body: { group: 2, color: currentColor() } })));
+
+    document.getElementById('btnRainbow').addEventListener('click', (e) =>
+      runDemo(e.currentTarget, 'レインボー点灯', () => api('/api/demo/rainbow', { body: {} })));
+
+    document.getElementById('btnBlink').addEventListener('click', (e) =>
+      runDemo(e.currentTarget, '点滅', () => api('/api/demo/blink', { body: { color: currentColor() } })));
+
+    document.getElementById('btnOff').addEventListener('click', (e) =>
+      runDemo(e.currentTarget, '全消灯', () => api('/api/demo/off', { body: {} })));
+  </script>
+</body>
+</html>
