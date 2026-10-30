@@ -9,3 +9,11 @@ dist/
 
 # 削除済み BLE ID書込み機能の参照資料（外部ツール .exe 等・約73MB）
 doument/ID書き込み/
+
+# GitHub に公開しない資料・ドキュメント類（ローカルのみ保持）
+/CLAUDE.md
+/README.md
+/PCL/
+/PCL_rainbow/
+/PCL_v1.4.0/
+/doument/
