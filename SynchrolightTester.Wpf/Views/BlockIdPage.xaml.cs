@@ -75,11 +75,14 @@ public partial class BlockIdPage : Page
     private void OnGroup2(object sender, RoutedEventArgs e)
         => Run("グループ2点灯", () => _runner.GroupAsync(2, _color));
 
+    /// <summary>送出間隔テストの発行間隔(ms)。スライダーの現在値（0〜10, 1ms刻み）。</summary>
+    private int GapMs => (int)Math.Round(GapSlider.Value);
+
     private void OnRainbow(object sender, RoutedEventArgs e)
-        => Run("レインボー点灯(固定)", () => _runner.RainbowAsync());
+        => Run("レインボー点灯(固定)", () => _runner.RainbowAsync(GapMs));
 
     private void OnRainbowShift(object sender, RoutedEventArgs e)
-        => Run("レインボー点灯(シフト)", () => _runner.RainbowShiftAsync());
+        => Run("レインボー点灯(シフト)", () => _runner.RainbowShiftAsync(null, GapMs));
 
     private void OnOff(object sender, RoutedEventArgs e)
         => Run("消灯", () => _runner.OffAsync());
@@ -104,6 +107,8 @@ public partial class BlockIdPage : Page
             await action();
             AppendLog($"{name} を実行しました。");
             StatusText.Text = _runner.IsRunning ? $"実行中：{_runner.CurrentDemo}" : "待機中（全消灯）";
+            // 発行間隔は実行中は変更不可（停止＝消灯で再び有効）。
+            GapSlider.IsEnabled = !_runner.IsRunning;
         }
         catch (SynchrolightApiException ex)
         {

@@ -66,6 +66,18 @@ public class DemoOptions
 
     /// <summary>レインボー(ブロック)バーストのキープアライブ間隔(ms)。既定50。</summary>
     public int RainbowBurstGapMs { get; set; } = 50;
+
+    /// <summary>
+    /// レインボー送出レート検証モードの「ACパケット発行間隔(ms)」初期値。0〜10ms をUIスライダーで可変にし、
+    /// 送信機(FA/FB)がどこまで詰めて送っても追従できるかを観察する。0=間を空けず連続発行。
+    /// </summary>
+    public int RainbowInterPacketGapMs { get; set; } = 3;
+
+    /// <summary>
+    /// レインボー送出レート検証モードの再送回数。間隔(interGap)を支配変数にするため既定1
+    /// （再送を増やすと1パケットの送出時間が延び、発行間隔の違いが見えにくくなる）。
+    /// </summary>
+    public int RainbowGapTestRetransmit { get; set; } = 1;
 }
 
 /// <summary>SynchrolightAPI 接続設定。</summary>

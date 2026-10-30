@@ -9,7 +9,7 @@
     <RootNamespace>SynchrolightTester.Wpf</RootNamespace>
     <AssemblyName>SynchrolightTester.Wpf</AssemblyName>
     <!-- 画面右上・マニュアルに表示するバージョン。更新時はここを変更する。 -->
-    <Version>1.3.0</Version>
+    <Version>1.5.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

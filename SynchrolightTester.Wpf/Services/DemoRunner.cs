@@ -104,14 +104,21 @@ public sealed class DemoRunner(
     /// StartPacketBurstHold）。1パケットずつ巡回送信する旧方式と異なり、全ブロックの更新が1バースト内
     /// （≒数十ms）に収まるため、ブロック（端末）ごとの点灯タイミングのずれが小さい。「消灯」まで保持。
     /// </summary>
-    public Task RainbowAsync()
-        => StartAsync("レインボー点灯(固定)", async ct =>
+    public Task RainbowAsync(int? interPacketGapMs = null)
+    {
+        int interGap = Math.Max(0, interPacketGapMs ?? _opt.RainbowInterPacketGapMs);
+        return StartAsync("レインボー点灯(固定)", async ct =>
         {
             await ClearAsync(ct);
-            await api.BlocksBurstAsync(BuildRainbowEntries(0), _opt.RainbowBurstGapMs, _opt.RainbowRetransmit, ct);
+            // 送出レート検証: 7色ACを連結せず interGap(ms) 間隔で順次発行（送信機の追従観察）。
+            // 間隔を支配変数にするため concat=false・retransmit=1 で送る。interGap=0 は連続発行(詰め打ち)。
+            await api.BlocksBurstAsync(
+                BuildRainbowEntries(0), _opt.RainbowBurstGapMs, _opt.RainbowGapTestRetransmit,
+                concat: false, interPacketGapMs: interGap, ct: ct);
             // サーバ側がバースト保持するため、こちらはキャンセル（消灯/他デモ）まで「実行中」を維持。
             await Task.Delay(Timeout.Infinite, ct);
         });
+    }
 
     /// <summary>
     /// レインボー点灯（レベル2＝シフト）: レベル1の発光色を一定間隔(既定0.5秒)で順次シフトする。
@@ -119,9 +126,10 @@ public sealed class DemoRunner(
     /// 各シフトのブロック間の点灯ずれはサーバ側の1バースト時間（≒数十ms）に収まる。「消灯」まで継続。
     /// ※旧「レインボー点滅(0.5秒 on/off)」は資料(レベル2=順次シフト)と異なるため廃止。
     /// </summary>
-    public Task RainbowShiftAsync(int? shiftMs = null)
+    public Task RainbowShiftAsync(int? shiftMs = null, int? interPacketGapMs = null)
     {
         int shiftInterval = Math.Max(1, shiftMs ?? _opt.RainbowShiftMs);
+        int interGap = Math.Max(0, interPacketGapMs ?? _opt.RainbowInterPacketGapMs);
         int n = RainbowPalette.Colors.Length;
         return StartAsync("レインボー点灯(シフト)", async ct =>
         {
@@ -129,8 +137,10 @@ public sealed class DemoRunner(
             int shift = 0;
             while (!ct.IsCancellationRequested)
             {
-                // 現在のシフト量の7色を1まとまりでバースト保持（サーバ側）。シフト間隔ごとに割当を1つ進めて再発行。
-                await api.BlocksBurstAsync(BuildRainbowEntries(shift), _opt.RainbowBurstGapMs, _opt.RainbowRetransmit, ct);
+                // 現在のシフト量の7色を interGap(ms) 間隔で順次発行（送出レート検証）。シフト間隔ごとに割当を1つ進めて再発行。
+                await api.BlocksBurstAsync(
+                    BuildRainbowEntries(shift), _opt.RainbowBurstGapMs, _opt.RainbowGapTestRetransmit,
+                    concat: false, interPacketGapMs: interGap, ct: ct);
                 await Task.Delay(shiftInterval, ct);
                 shift = (shift + 1) % n;
             }

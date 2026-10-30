@@ -127,13 +127,17 @@ public class SynchrolightApiClient(
         IEnumerable<(int progNo, int blockNo, Rgb color)> entries,
         int? burstGapMs = null,
         int? retransmit = null,
+        bool? concat = null,
+        int? interPacketGapMs = null,
         CancellationToken ct = default)
         => PostAsync("api/light/blocks",
             new
             {
                 entries = entries.Select(e => new { progNo = e.progNo, blockNo = e.blockNo, color = C(e.color) }).ToArray(),
                 burstGapMs,
-                retransmit
+                retransmit,
+                concat,
+                interPacketGapMs
             }, ct);
 
     /// <summary>A2: 全体一括色。</summary>

@@ -29,18 +29,38 @@
                 <WrapPanel HorizontalAlignment="Center">
                     <Button Content="グループ1点灯"        Style="{StaticResource FuncButton}" Click="OnGroup1"/>
                     <Button Content="グループ2点灯"        Style="{StaticResource FuncButton}" Click="OnGroup2"/>
-                    <!-- レインボー: 端末のレインボー用ブロックIDエリア(7)書込み済みを 2026-10-19 実機確認（固定/シフトとも7色点灯OK）→表示(Visible)。
-                         実装は DemoRunner.RainbowAsync/RainbowShiftAsync。 -->
-                    <Button Content="レインボー点灯(固定)"  Style="{StaticResource FuncButton}" Click="OnRainbow"      Visibility="Visible"/>
-                    <Button Content="レインボー点灯(シフト)" Style="{StaticResource FuncButton}" Click="OnRainbowShift" Visibility="Visible"/>
                     <Button Content="消灯"                 Style="{StaticResource OffButton}"  Click="OnOff"/>
                 </WrapPanel>
 
-                <!-- レインボー凡例（レインボー2ボタンと共に表示） -->
-                <Border Background="White" BorderBrush="#D9E2EC" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,4,0,0" Visibility="Visible">
+                <!-- ▼ レインボー送出間隔テスト（検証用）
+                     7色ACを1発ずつ可変間隔で発行し、送信機(FA/FB)がどこまで詰めて送っても追従できるかを観察する。
+                     間隔はサーバ(API)側で正確に効く（Stopwatchスピン待機）。※顧客納品Ver.(v1.4.0)では非表示にする想定。 -->
+                <Border Background="White" BorderBrush="#D9E2EC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,18,0,0">
                     <StackPanel>
+                        <TextBlock Text="レインボー 送出間隔テスト（検証用）" FontWeight="Bold" Margin="0,0,0,4"/>
+                        <TextBlock Text="7色のACコマンドを1発ずつ下記の発行間隔で順次送出します。間隔を変えて送信機(FA/FB)の追従・点灯の見え方を確認します。"
+                                   Foreground="#52606D" FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap"/>
+
+                        <!-- 発行間隔スライダー（0〜10ms / 1ms刻み・実行中は変更不可） -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Center">
+                            <TextBlock Text="ACパケット発行間隔：" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Slider x:Name="GapSlider" Width="260" Minimum="0" Maximum="10"
+                                    TickFrequency="1" IsSnapToTickEnabled="True" TickPlacement="BottomRight"
+                                    Value="3" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ElementName=GapSlider, Path=Value, StringFormat={}{0:0} ms}"
+                                       FontWeight="Bold" Width="48" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            <TextBlock Text="（0=連続発行 〜 10ms, 1ms刻み／実行中は変更不可）"
+                                       Foreground="#52606D" FontSize="12" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </StackPanel>
+
+                        <WrapPanel HorizontalAlignment="Center">
+                            <Button Content="レインボー点灯(固定)"  Style="{StaticResource FuncButton}" Click="OnRainbow"/>
+                            <Button Content="レインボー点灯(シフト)" Style="{StaticResource FuncButton}" Click="OnRainbowShift"/>
+                        </WrapPanel>
+
+                        <!-- レインボー凡例 -->
                         <TextBlock Text="レインボー固定7色（ブロックIDエリア7＝7進法割当。値1〜7をAC/ブロック制御で点灯）。固定=レベル1（各値に対応色で点灯・保持）／シフト=レベル2（約0.5秒間隔で発光色を順次シフト）"
-                                   Foreground="#52606D" FontSize="12" Margin="0,0,0,6" TextWrapping="Wrap"/>
+                                   Foreground="#52606D" FontSize="12" Margin="0,8,0,6" TextWrapping="Wrap"/>
                         <StackPanel x:Name="RainbowLegend" Orientation="Horizontal"/>
                     </StackPanel>
                 </Border>
