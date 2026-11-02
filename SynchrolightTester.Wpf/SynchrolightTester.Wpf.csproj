@@ -8,8 +8,10 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>SynchrolightTester.Wpf</RootNamespace>
     <AssemblyName>SynchrolightTester.Wpf</AssemblyName>
-    <!-- 画面右上・マニュアルに表示するバージョン。更新時はここを変更する。 -->
-    <Version>1.5.0</Version>
+    <!-- 画面右上・マニュアルに表示するバージョン。更新時はここを変更する。
+         ※追加仕様20261101訂(列ID/十字/指定ID点灯)を中間リリースとして 1.6.0 で配布。
+           実機テスト合格後に 2.0.0 へ更新する予定。 -->
+    <Version>1.6.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

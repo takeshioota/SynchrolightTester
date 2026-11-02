@@ -75,6 +75,18 @@ public partial class BlockIdPage : Page
     private void OnGroup2(object sender, RoutedEventArgs e)
         => Run("グループ2点灯", () => _runner.GroupAsync(2, _color));
 
+    // 指定ID点灯（追加仕様 20261101訂）: ブロックIDエリア1 の値=指定ID の端末のみ点灯。
+    // 未入力（整数として解釈できない）場合は実行しない。入力値のチェックはしない（整数であればそのまま送出）。
+    private void OnBlockId(object sender, RoutedEventArgs e)
+    {
+        if (!int.TryParse(BlockIdBox.Text, out var id))
+        {
+            AppendLog("[未実行] 指定IDを整数で入力してください（未入力のため実行しません）。");
+            return;
+        }
+        Run($"指定ID点灯（ID={id}）", () => _runner.BlockIdAsync(id, _color));
+    }
+
     /// <summary>送出間隔テストの発行間隔(ms)。スライダーの現在値（0〜10, 1ms刻み）。</summary>
     private int GapMs => (int)Math.Round(GapSlider.Value);
 

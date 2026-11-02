@@ -15,5 +15,7 @@ public partial class MenuPage : Page
     }
 
     private void OnRowId(object sender, RoutedEventArgs e) => _nav.ToRowId();
+    private void OnColumnId(object sender, RoutedEventArgs e) => _nav.ToColumnId();
+    private void OnCross(object sender, RoutedEventArgs e) => _nav.ToCross();
     private void OnBlockId(object sender, RoutedEventArgs e) => _nav.ToBlockId();
 }

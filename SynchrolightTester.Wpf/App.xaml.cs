@@ -37,6 +37,8 @@ public partial class App : Application
         builder.Services.AddSingleton<MainWindow>();
         builder.Services.AddTransient<MenuPage>();
         builder.Services.AddTransient<RowIdPage>();
+        builder.Services.AddTransient<ColumnIdPage>();
+        builder.Services.AddTransient<CrossIdPage>();
         builder.Services.AddTransient<BlockIdPage>();
 
         _host = builder.Build();

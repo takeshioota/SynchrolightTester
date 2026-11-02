@@ -9,7 +9,7 @@
             <TextBlock Text="ID書込み済シンクロライト端末の個別操作確認"
                        Foreground="#52606D" HorizontalAlignment="Center" Margin="0,0,0,28"/>
 
-            <Button x:Name="BtnRowId" Height="92" Margin="0,0,0,18" Click="OnRowId"
+            <Button x:Name="BtnRowId" Height="84" Margin="0,0,0,14" Click="OnRowId"
                     Background="#1E88E5" Foreground="White" BorderThickness="0">
                 <StackPanel>
                     <TextBlock Text="行ID操作確認" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -18,11 +18,29 @@
                 </StackPanel>
             </Button>
 
-            <Button x:Name="BtnBlockId" Height="92" Click="OnBlockId"
+            <Button x:Name="BtnColumnId" Height="84" Margin="0,0,0,14" Click="OnColumnId"
+                    Background="#3949AB" Foreground="White" BorderThickness="0">
+                <StackPanel>
+                    <TextBlock Text="列ID操作確認" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="連続点灯／連続点滅／奇数点灯／偶数点灯（列IDを対象。対象端末数 1〜200）"
+                               FontSize="12" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="BtnCross" Height="84" Margin="0,0,0,14" Click="OnCross"
+                    Background="#5E35B1" Foreground="White" BorderThickness="0">
+                <StackPanel>
+                    <TextBlock Text="行＋列 操作確認（十字）" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="指定した行IDと列IDを同時に点灯（十字型）"
+                               FontSize="12" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="BtnBlockId" Height="84" Click="OnBlockId"
                     Background="#00897B" Foreground="White" BorderThickness="0">
                 <StackPanel>
                     <TextBlock Text="ブロックID操作確認" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="グループ1点灯／グループ2点灯（ブロックIDエリア）"
+                    <TextBlock Text="グループ1／グループ2点灯（エリア8）／指定ID点灯（エリア1）"
                                FontSize="12" Margin="0,4,0,0" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Button>

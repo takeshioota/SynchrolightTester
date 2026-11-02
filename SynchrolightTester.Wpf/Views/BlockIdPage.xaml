@@ -23,8 +23,8 @@
                     <Button x:Name="BtnRed"   Content="赤" Style="{StaticResource ColorButton}" Background="#E53935" Click="OnColor"/>
                 </StackPanel>
 
-                <!-- 機能（排他） -->
-                <TextBlock Text="機能（各機能は排他。選択時は一旦全消灯してから実行。ブロックIDエリアの値で制御）"
+                <!-- 既存機能（グループ点灯＝ブロックIDエリア8の値で制御） -->
+                <TextBlock Text="既存機能（各機能は排他。選択時は一旦全消灯してから実行。ブロックIDエリア8の値で制御）"
                            FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
                 <WrapPanel HorizontalAlignment="Center">
                     <Button Content="グループ1点灯"        Style="{StaticResource FuncButton}" Click="OnGroup1"/>
@@ -32,10 +32,24 @@
                     <Button Content="消灯"                 Style="{StaticResource OffButton}"  Click="OnOff"/>
                 </WrapPanel>
 
+                <!-- 追加機能（指定ID点灯＝ブロックIDエリア1の値で制御）／追加仕様 20261101訂 -->
+                <TextBlock Text="追加機能（指定ID点灯＝ブロックIDエリア1の値で制御。整数で指定、未入力時は実行しません）"
+                           FontWeight="Bold" HorizontalAlignment="Center" Margin="0,18,0,8"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8" VerticalAlignment="Center">
+                    <TextBlock Text="指定ID：" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBox x:Name="BlockIdBox" Width="80" VerticalContentAlignment="Center"
+                             TextAlignment="Right" Padding="4,2"/>
+                    <TextBlock Text="（整数で指定）" Foreground="#52606D" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+                <WrapPanel HorizontalAlignment="Center">
+                    <Button Content="指定ID点灯"           Style="{StaticResource FuncButton}" Click="OnBlockId"/>
+                </WrapPanel>
+
                 <!-- ▼ レインボー送出間隔テスト（検証用）
                      7色ACを1発ずつ可変間隔で発行し、送信機(FA/FB)がどこまで詰めて送っても追従できるかを観察する。
-                     間隔はサーバ(API)側で正確に効く（Stopwatchスピン待機）。※顧客納品Ver.(v1.4.0)では非表示にする想定。 -->
-                <Border Background="White" BorderBrush="#D9E2EC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,18,0,0">
+                     間隔はサーバ(API)側で正確に効く（Stopwatchスピン待機）。
+                     ※追加仕様20261101訂（次期版・v1.4.0ベース）ではレインボー検証機能は非表示（Collapsed）。 -->
+                <Border Visibility="Collapsed" Background="White" BorderBrush="#D9E2EC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,18,0,0">
                     <StackPanel>
                         <TextBlock Text="レインボー 送出間隔テスト（検証用）" FontWeight="Bold" Margin="0,0,0,4"/>
                         <TextBlock Text="7色のACコマンドを1発ずつ下記の発行間隔で順次送出します。間隔を変えて送信機(FA/FB)の追従・点灯の見え方を確認します。"

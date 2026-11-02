@@ -5,8 +5,8 @@ using SynchrolightTester.Wpf.Models;
 namespace SynchrolightTester.Wpf.Services;
 
 /// <summary>
-/// 各機能（連続点灯／連続点滅／奇数／偶数／グループ／レインボー／全消灯）を実行するサービス。
-/// 同時に走るデモは常に1つ。新しいデモ開始時に前のデモを自動停止する（＝機能は排他）。
+/// 各機能（連続点灯／連続点滅／奇数／偶数［行ID・列ID］／行＋列(十字)／グループ／指定ID／レインボー／全消灯）を
+/// 実行するサービス。同時に走るデモは常に1つ。新しいデモ開始時に前のデモを自動停止する（＝機能は排他）。
 /// 各機能は実行前に A2黒で一旦全消灯してからシーンを開始し、「消灯」操作まで状態を維持する。
 /// </summary>
 public sealed class DemoRunner(
@@ -24,63 +24,67 @@ public sealed class DemoRunner(
     /// <summary>デモが実行中（バックグラウンドタスクが生存）か。</summary>
     public bool IsRunning => _task is { IsCompleted: false };
 
+    /// <summary>
+    /// 軸別の「複数ID同色制御」送出。行＝AA(RowsAsync)／列＝A8(ColsAsync) が同一シグネチャのためこれで切替える。
+    /// (field, 開始ID, ID数, 色, ct)。
+    /// </summary>
+    private delegate Task AxisWrite(int field, int start, int len, Rgb color, CancellationToken ct);
+
     // ========================= 公開デモ（行ID） =========================
 
-    /// <summary>連続点灯: ID001 から順次点灯（点灯済みは継続点灯）。count=対象端末数。</summary>
+    /// <summary>連続点灯: 行ID001 から順次点灯（点灯済みは継続点灯）。count=対象端末数。</summary>
     public Task SequentialOnAsync(Rgb color, int? count = null, int? intervalMs = null)
-    {
-        int max = EffectiveCount(count);
-        int interval = intervalMs ?? _opt.SequentialIntervalMs;
-        return StartAsync("連続点灯", async ct =>
-        {
-            await ClearAsync(ct);
-            // AA(開始行=1, 行数=N) を N=1..max で送る＝累積点灯。最終的に 1..max を1パケットで保持。
-            for (int n = 1; n <= max; n++)
-            {
-                ct.ThrowIfCancellationRequested();
-                await api.RowsAsync(_opt.Field, 1, n, color, ct);
-                await Task.Delay(interval, ct);
-            }
-            logger.LogInformation("連続点灯 完了: 1..{Max}（保持中）", max);
-            // 全点灯状態を保持（停止/他デモまで「実行中」を維持）。
-            await Task.Delay(Timeout.Infinite, ct);
-        });
-    }
+        => SequentialOnCoreAsync("連続点灯", api.RowsAsync, color, count, intervalMs);
 
-    /// <summary>連続点滅: ID001 から1端末ずつ blinkCount 回点滅し、終えたら次へ移動（消灯までスイープをループ）。</summary>
+    /// <summary>連続点滅: 行ID001 から1端末ずつ blinkCount 回点滅し、終えたら次へ移動（消灯までスイープをループ）。</summary>
     public Task SequentialBlinkAsync(Rgb color, int? count = null, int? onMs = null, int? offMs = null, int? blinkCount = null)
-    {
-        int max = EffectiveCount(count);
-        int on = onMs ?? _opt.BlinkOnMs;
-        int off = offMs ?? _opt.BlinkOffMs;
-        int times = Math.Max(1, blinkCount ?? _opt.BlinkCount);
-        return StartAsync("連続点滅", async ct =>
-        {
-            await ClearAsync(ct);
-            while (!ct.IsCancellationRequested)
-            {
-                for (int id = 1; id <= max; id++)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    for (int t = 0; t < times; t++)
-                    {
-                        await api.RowsAsync(_opt.Field, id, 1, color, ct);      // 点灯
-                        await Task.Delay(on, ct);
-                        await api.RowsAsync(_opt.Field, id, 1, Rgb.Black, ct);  // 消灯
-                        await Task.Delay(off, ct);
-                    }
-                }
-            }
-        });
-    }
+        => SequentialBlinkCoreAsync("連続点滅", api.RowsAsync, color, count, onMs, offMs, blinkCount);
 
     /// <summary>奇数点灯: 行IDが奇数の端末のみ点灯（1..count）。</summary>
     public Task OddAsync(Rgb color, int? count = null)
-        => StartSceneAsync("奇数点灯", color, EnumerateParity(odd: true, EffectiveCount(count)));
+        => StartSceneAsync("奇数点灯", api.RowsAsync, color, EnumerateParity(odd: true, EffectiveCount(count)));
 
     /// <summary>偶数点灯: 行IDが偶数の端末のみ点灯（1..count）。</summary>
     public Task EvenAsync(Rgb color, int? count = null)
-        => StartSceneAsync("偶数点灯", color, EnumerateParity(odd: false, EffectiveCount(count)));
+        => StartSceneAsync("偶数点灯", api.RowsAsync, color, EnumerateParity(odd: false, EffectiveCount(count)));
+
+    // ========================= 公開デモ（列ID） =========================
+    // 追加仕様(20261101訂): 既存「行ID操作確認」の動作を列ID対象で実行。送出は A8(cols)。
+
+    /// <summary>連続点灯（列）: 列ID001 から順次点灯（点灯済みは継続点灯）。count=対象端末数。</summary>
+    public Task SequentialOnColAsync(Rgb color, int? count = null, int? intervalMs = null)
+        => SequentialOnCoreAsync("連続点灯(列)", api.ColsAsync, color, count, intervalMs);
+
+    /// <summary>連続点滅（列）: 列ID001 から1端末ずつ blinkCount 回点滅し、終えたら次へ移動。</summary>
+    public Task SequentialBlinkColAsync(Rgb color, int? count = null, int? onMs = null, int? offMs = null, int? blinkCount = null)
+        => SequentialBlinkCoreAsync("連続点滅(列)", api.ColsAsync, color, count, onMs, offMs, blinkCount);
+
+    /// <summary>奇数点灯（列）: 列IDが奇数の端末のみ点灯（1..count）。</summary>
+    public Task OddColAsync(Rgb color, int? count = null)
+        => StartSceneAsync("奇数点灯(列)", api.ColsAsync, color, EnumerateParity(odd: true, EffectiveCount(count)));
+
+    /// <summary>偶数点灯（列）: 列IDが偶数の端末のみ点灯（1..count）。</summary>
+    public Task EvenColAsync(Rgb color, int? count = null)
+        => StartSceneAsync("偶数点灯(列)", api.ColsAsync, color, EnumerateParity(odd: false, EffectiveCount(count)));
+
+    // ========================= 公開デモ（行＋列＝十字） =========================
+
+    /// <summary>
+    /// 行＋列 同時点灯（十字）: 指定した行ID全体(AA)と列ID全体(A8)を同時に点灯する。
+    /// SynchrolightAPI は 1 パケットしか連続保持できないため、行(AA)と列(A8)の2パケットを
+    /// RotateIntervalMs 間隔で巡回連続送信し、両方の点灯を維持する。「消灯」まで継続。
+    /// </summary>
+    public Task CrossAsync(Rgb color, int rowId, int colId)
+    {
+        int r = Math.Clamp(rowId, 1, _opt.MaxId);
+        int c = Math.Clamp(colId, 1, _opt.MaxId);
+        var sends = new Func<CancellationToken, Task>[]
+        {
+            ct => api.RowsAsync(_opt.Field, r, 1, color, ct),  // 行ID=r 全体
+            ct => api.ColsAsync(_opt.Field, c, 1, color, ct),  // 列ID=c 全体
+        };
+        return StartAsync($"行{r}＋列{c}点灯(十字)", ct => RunRotatingSceneAsync(ct, sends));
+    }
 
     // ========================= 公開デモ（ブロックID） =========================
 
@@ -93,6 +97,22 @@ public sealed class DemoRunner(
             {
                 await ClearAsync(c);
                 await api.BlockAsync(_opt.GroupProgramNo, group, color, c);
+            });
+        });
+    }
+
+    /// <summary>
+    /// 指定ID点灯: ブロックIDエリア(AreaIdProgramNo=1) の値=blockId の端末のみ点灯。追加仕様(20261101訂)。
+    /// 1ブロック値のため AC を1パケットで保持（消灯まで継続）。
+    /// </summary>
+    public Task BlockIdAsync(int blockId, Rgb color)
+    {
+        return StartAsync($"指定ID{blockId}点灯", async ct =>
+        {
+            await RunSceneAsync(ct, async c =>
+            {
+                await ClearAsync(c);
+                await api.BlockAsync(_opt.AreaIdProgramNo, blockId, color, c);
             });
         });
     }
@@ -172,6 +192,53 @@ public sealed class DemoRunner(
 
     // ========================= 内部 =========================
 
+    /// <summary>連続点灯の共通本体: write(開始=1, ID数=N) を N=1..max で送る＝累積点灯。最後に 1..max を1パケットで保持。</summary>
+    private Task SequentialOnCoreAsync(string name, AxisWrite write, Rgb color, int? count, int? intervalMs)
+    {
+        int max = EffectiveCount(count);
+        int interval = intervalMs ?? _opt.SequentialIntervalMs;
+        return StartAsync(name, async ct =>
+        {
+            await ClearAsync(ct);
+            for (int n = 1; n <= max; n++)
+            {
+                ct.ThrowIfCancellationRequested();
+                await write(_opt.Field, 1, n, color, ct);
+                await Task.Delay(interval, ct);
+            }
+            logger.LogInformation("{Name} 完了: 1..{Max}（保持中）", name, max);
+            // 全点灯状態を保持（停止/他デモまで「実行中」を維持）。
+            await Task.Delay(Timeout.Infinite, ct);
+        });
+    }
+
+    /// <summary>連続点滅の共通本体: ID001 から1端末ずつ times 回点滅し、終えたら次へ移動（消灯までループ）。</summary>
+    private Task SequentialBlinkCoreAsync(string name, AxisWrite write, Rgb color, int? count, int? onMs, int? offMs, int? blinkCount)
+    {
+        int max = EffectiveCount(count);
+        int on = onMs ?? _opt.BlinkOnMs;
+        int off = offMs ?? _opt.BlinkOffMs;
+        int times = Math.Max(1, blinkCount ?? _opt.BlinkCount);
+        return StartAsync(name, async ct =>
+        {
+            await ClearAsync(ct);
+            while (!ct.IsCancellationRequested)
+            {
+                for (int id = 1; id <= max; id++)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    for (int t = 0; t < times; t++)
+                    {
+                        await write(_opt.Field, id, 1, color, ct);      // 点灯
+                        await Task.Delay(on, ct);
+                        await write(_opt.Field, id, 1, Rgb.Black, ct);  // 消灯
+                        await Task.Delay(off, ct);
+                    }
+                }
+            }
+        });
+    }
+
     private int EffectiveCount(int? count) => Math.Clamp(count ?? _opt.MaxId, 1, _opt.MaxId);
 
     private static IEnumerable<int> EnumerateParity(bool odd, int max)
@@ -182,14 +249,14 @@ public sealed class DemoRunner(
     }
 
     /// <summary>
-    /// 行IDの集合（奇数/偶数など非連続な複数行）を点灯する静的シーン。
-    /// 非連続なので 1 パケットにまとめられず、AA を行ごとに送る＝APIの単一保持では最後の行しか残らない。
-    /// 全対象行をローテーション送信し続けて全点灯を維持する。
+    /// ID集合（奇数/偶数など非連続な複数ID）を点灯する静的シーン。軸は write で切替（行=AA／列=A8）。
+    /// 非連続なので 1 パケットにまとめられず、ID ごとに送る＝APIの単一保持では最後のIDしか残らない。
+    /// 全対象IDをローテーション送信し続けて全点灯を維持する。
     /// </summary>
-    private Task StartSceneAsync(string name, Rgb color, IEnumerable<int> ids)
+    private Task StartSceneAsync(string name, AxisWrite write, Rgb color, IEnumerable<int> ids)
     {
         var sends = ids
-            .Select(id => (Func<CancellationToken, Task>)(c => api.RowsAsync(_opt.Field, id, 1, color, c)))
+            .Select(id => (Func<CancellationToken, Task>)(c => write(_opt.Field, id, 1, color, c)))
             .ToArray();
         return StartAsync(name, ct => RunRotatingSceneAsync(ct, sends));
     }

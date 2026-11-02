@@ -48,6 +48,12 @@ public class DemoOptions
     public int GroupProgramNo { get; set; } = 8;
 
     /// <summary>
+    /// 指定ID点灯のブロックIDエリア（プログラム番号）。追加仕様(20261101訂)=エリア1。
+    /// 各端末の area1 の値(=指定ID)が一致する端末のみ点灯。AC(block) を blockNo=指定ID で送出する。
+    /// </summary>
+    public int AreaIdProgramNo { get; set; } = 1;
+
+    /// <summary>
     /// レインボー制御のブロックIDエリア（プログラム番号）。
     /// 最新資料「ブロックID＿レインボー点灯.pptx」(2026-10-17)=エリア7。各端末は area7 の値(1〜7, 7進法)に
     /// 割当てられた色で点灯。AC(block) を blockNo=1..7 で送出する。

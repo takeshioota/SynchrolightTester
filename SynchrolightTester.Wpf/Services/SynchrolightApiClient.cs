@@ -111,6 +111,10 @@ public class SynchrolightApiClient(
     public Task<ApiResult> RowsAsync(int field, int startRow, int rowLen, Rgb color, CancellationToken ct = default)
         => PostAsync("api/light/rows", new { field, startRow, rowLen, color = C(color) }, ct);
 
+    /// <summary>A8: 複数列同色制御（列ID単位の点灯）。field/startCol/colLen/color。行(AA)の列版。</summary>
+    public Task<ApiResult> ColsAsync(int field, int startCol, int colLen, Rgb color, CancellationToken ct = default)
+        => PostAsync("api/light/cols", new { field, startCol, colLen, color = C(color) }, ct);
+
     /// <summary>
     /// AC: ブロック制御（ブロックIDエリア=progNo の値=blockNo の端末を点灯）。プロトコル 3.10。
     /// レインボー(エリア6)は blockNo=1..7 を各固定色で送出して「area6 値ごとの固定色」を作る。

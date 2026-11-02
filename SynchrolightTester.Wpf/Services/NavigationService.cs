@@ -15,6 +15,8 @@ public sealed class NavigationService(IServiceProvider sp)
 
     public void ToMenu() => Navigate<MenuPage>();
     public void ToRowId() => Navigate<RowIdPage>();
+    public void ToColumnId() => Navigate<ColumnIdPage>();
+    public void ToCross() => Navigate<CrossIdPage>();
     public void ToBlockId() => Navigate<BlockIdPage>();
 
     private void Navigate<T>() where T : Page => Frame?.Navigate(sp.GetRequiredService<T>());
