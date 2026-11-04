@@ -27,15 +27,6 @@
                 </StackPanel>
             </Button>
 
-            <Button x:Name="BtnCross" Height="84" Margin="0,0,0,14" Click="OnCross"
-                    Background="#5E35B1" Foreground="White" BorderThickness="0">
-                <StackPanel>
-                    <TextBlock Text="行＋列 操作確認（十字）" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="指定した行IDと列IDを同時に点灯（十字型）"
-                               FontSize="12" Margin="0,4,0,0" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-
             <Button x:Name="BtnBlockId" Height="84" Click="OnBlockId"
                     Background="#00897B" Foreground="White" BorderThickness="0">
                 <StackPanel>

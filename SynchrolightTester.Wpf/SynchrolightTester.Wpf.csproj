@@ -9,9 +9,10 @@
     <RootNamespace>SynchrolightTester.Wpf</RootNamespace>
     <AssemblyName>SynchrolightTester.Wpf</AssemblyName>
     <!-- 画面右上・マニュアルに表示するバージョン。更新時はここを変更する。
-         ※追加仕様20261101訂(列ID/十字/指定ID点灯)を中間リリースとして 1.6.0 で配布。
-           実機テスト合格後に 2.0.0 へ更新する予定。 -->
-    <Version>1.6.0</Version>
+         ※追加仕様20261101訂(doument/追加仕様.pptx)に準拠した正式版として 2.0.0 で配布。
+           列ID操作確認を新設・ブロックID操作確認に指定ID点灯(エリア1)を追加。
+           レインボー検証機能は実装せず(UI非表示/コードは残置)。行＋列(十字)は仕様外のため非搭載。 -->
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

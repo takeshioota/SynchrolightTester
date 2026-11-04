@@ -46,9 +46,9 @@
                 </WrapPanel>
 
                 <!-- ▼ レインボー送出間隔テスト（検証用）
-                     7色ACを1発ずつ可変間隔で発行し、送信機(FA/FB)がどこまで詰めて送っても追従できるかを観察する。
-                     間隔はサーバ(API)側で正確に効く（Stopwatchスピン待機）。
-                     ※追加仕様20261101訂（次期版・v1.4.0ベース）ではレインボー検証機能は非表示（Collapsed）。 -->
+                     追加仕様20261101訂により「レインボー検証機能は実装せず」＝本ブロックは非表示（Collapsed）。
+                     実装（DemoRunner.RainbowAsync/RainbowShiftAsync・送出間隔スライダー）はコードとして残置するが
+                     UIには出さない。 -->
                 <Border Visibility="Collapsed" Background="White" BorderBrush="#D9E2EC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,18,0,0">
                     <StackPanel>
                         <TextBlock Text="レインボー 送出間隔テスト（検証用）" FontWeight="Bold" Margin="0,0,0,4"/>

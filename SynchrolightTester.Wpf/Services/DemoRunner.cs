@@ -5,7 +5,7 @@ using SynchrolightTester.Wpf.Models;
 namespace SynchrolightTester.Wpf.Services;
 
 /// <summary>
-/// 各機能（連続点灯／連続点滅／奇数／偶数［行ID・列ID］／行＋列(十字)／グループ／指定ID／レインボー／全消灯）を
+/// 各機能（連続点灯／連続点滅／奇数／偶数［行ID・列ID］／グループ／指定ID／レインボー／全消灯）を
 /// 実行するサービス。同時に走るデモは常に1つ。新しいデモ開始時に前のデモを自動停止する（＝機能は排他）。
 /// 各機能は実行前に A2黒で一旦全消灯してからシーンを開始し、「消灯」操作まで状態を維持する。
 /// </summary>
@@ -67,25 +67,6 @@ public sealed class DemoRunner(
     public Task EvenColAsync(Rgb color, int? count = null)
         => StartSceneAsync("偶数点灯(列)", api.ColsAsync, color, EnumerateParity(odd: false, EffectiveCount(count)));
 
-    // ========================= 公開デモ（行＋列＝十字） =========================
-
-    /// <summary>
-    /// 行＋列 同時点灯（十字）: 指定した行ID全体(AA)と列ID全体(A8)を同時に点灯する。
-    /// SynchrolightAPI は 1 パケットしか連続保持できないため、行(AA)と列(A8)の2パケットを
-    /// RotateIntervalMs 間隔で巡回連続送信し、両方の点灯を維持する。「消灯」まで継続。
-    /// </summary>
-    public Task CrossAsync(Rgb color, int rowId, int colId)
-    {
-        int r = Math.Clamp(rowId, 1, _opt.MaxId);
-        int c = Math.Clamp(colId, 1, _opt.MaxId);
-        var sends = new Func<CancellationToken, Task>[]
-        {
-            ct => api.RowsAsync(_opt.Field, r, 1, color, ct),  // 行ID=r 全体
-            ct => api.ColsAsync(_opt.Field, c, 1, color, ct),  // 列ID=c 全体
-        };
-        return StartAsync($"行{r}＋列{c}点灯(十字)", ct => RunRotatingSceneAsync(ct, sends));
-    }
-
     // ========================= 公開デモ（ブロックID） =========================
 
     /// <summary>グループ点灯: ブロックIDエリア(GroupProgramNo=8) の値=group の端末を点灯。</summary>
@@ -93,11 +74,12 @@ public sealed class DemoRunner(
     {
         return StartAsync($"グループ{group}点灯", async ct =>
         {
-            await RunSceneAsync(ct, async c =>
-            {
-                await ClearAsync(c);
-                await api.BlockAsync(_opt.GroupProgramNo, group, color, c);
-            });
+            // 仕様「機能実行時は一旦全消灯してから開始」: A2黒を ClearBlackoutMs 間ホールドし、
+            // キープアライブ再送で全端末を確実に消灯してからグループを点灯する。
+            // ※ブロック(AC)は一致ブロックを点灯するだけで非一致端末を消灯しないため、消灯を確実に
+            //   届けないと前のグループ/指定IDが点いたまま残る（消灯せず連続指定した場合の複数点灯対策）。
+            await ClearAndBlackoutAsync(ct);
+            await RunSceneAsync(ct, c => api.BlockAsync(_opt.GroupProgramNo, group, color, c));
         });
     }
 
@@ -109,11 +91,10 @@ public sealed class DemoRunner(
     {
         return StartAsync($"指定ID{blockId}点灯", async ct =>
         {
-            await RunSceneAsync(ct, async c =>
-            {
-                await ClearAsync(c);
-                await api.BlockAsync(_opt.AreaIdProgramNo, blockId, color, c);
-            });
+            // 一旦全消灯（キープアライブ再送で確実に消灯）してから指定IDを点灯。
+            // ※消灯せず次の指定ID(AC)を送ると、前の指定ID端末が消えずに残る（AC は非一致端末を消さない）。
+            await ClearAndBlackoutAsync(ct);
+            await RunSceneAsync(ct, c => api.BlockAsync(_opt.AreaIdProgramNo, blockId, color, c));
         });
     }
 
@@ -129,7 +110,8 @@ public sealed class DemoRunner(
         int interGap = Math.Max(0, interPacketGapMs ?? _opt.RainbowInterPacketGapMs);
         return StartAsync("レインボー点灯(固定)", async ct =>
         {
-            await ClearAsync(ct);
+            // 一旦全消灯（キープアライブ再送で確実に消灯）してから開始。
+            await ClearAndBlackoutAsync(ct);
             // 送出レート検証: 7色ACを連結せず interGap(ms) 間隔で順次発行（送信機の追従観察）。
             // 間隔を支配変数にするため concat=false・retransmit=1 で送る。interGap=0 は連続発行(詰め打ち)。
             await api.BlocksBurstAsync(
@@ -153,7 +135,8 @@ public sealed class DemoRunner(
         int n = RainbowPalette.Colors.Length;
         return StartAsync("レインボー点灯(シフト)", async ct =>
         {
-            await ClearAsync(ct);
+            // 一旦全消灯（キープアライブ再送で確実に消灯）してから開始。
+            await ClearAndBlackoutAsync(ct);
             int shift = 0;
             while (!ct.IsCancellationRequested)
             {
@@ -199,7 +182,7 @@ public sealed class DemoRunner(
         int interval = intervalMs ?? _opt.SequentialIntervalMs;
         return StartAsync(name, async ct =>
         {
-            await ClearAsync(ct);
+            await ClearAndBlackoutAsync(ct);
             for (int n = 1; n <= max; n++)
             {
                 ct.ThrowIfCancellationRequested();
@@ -221,7 +204,7 @@ public sealed class DemoRunner(
         int times = Math.Max(1, blinkCount ?? _opt.BlinkCount);
         return StartAsync(name, async ct =>
         {
-            await ClearAsync(ct);
+            await ClearAndBlackoutAsync(ct);
             while (!ct.IsCancellationRequested)
             {
                 for (int id = 1; id <= max; id++)
@@ -268,7 +251,7 @@ public sealed class DemoRunner(
     /// </summary>
     private async Task RunRotatingSceneAsync(CancellationToken ct, IReadOnlyList<Func<CancellationToken, Task>> sends)
     {
-        await ClearAsync(ct);
+        await ClearAndBlackoutAsync(ct);
         if (sends.Count == 0)
         {
             await Task.Delay(Timeout.Infinite, ct);
@@ -308,6 +291,20 @@ public sealed class DemoRunner(
 
     /// <summary>全体を一旦消灯（反対側/前シーンを確実に消す）。</summary>
     private Task ClearAsync(CancellationToken ct) => api.GlobalAsync(0x00, Rgb.Black, ct);
+
+    /// <summary>
+    /// 機能開始時の「一旦全消灯してから開始」を確実に見せるクリア: A2黒を送り、ClearBlackoutMs 間だけ
+    /// 消灯状態を保ってから点灯へ移る。全機能（行ID／列ID／グループ／指定ID／レインボー）の先頭で1回だけ
+    /// 呼ぶ。SynchrolightAPI は 1 パケットのみ保持・再送するため、直後に別コマンドで保持が置き換わると
+    /// A2黒が 1 回しか飛ばず RF 取りこぼしで消え残る端末が出る。本待ちの間は A2黒が連続再送されるため、
+    /// 前シーンの点灯を確実に消灯してから次の点灯へ移れる（ブロックID系で前の指定ID/グループが残る問題の対処）。
+    /// </summary>
+    private async Task ClearAndBlackoutAsync(CancellationToken ct)
+    {
+        await ClearAsync(ct);
+        if (_opt.ClearBlackoutMs > 0)
+            await Task.Delay(_opt.ClearBlackoutMs, ct);
+    }
 
     private async Task StartAsync(string name, Func<CancellationToken, Task> body)
     {

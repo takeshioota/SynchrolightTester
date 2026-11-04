@@ -33,6 +33,15 @@ public class DemoOptions
     /// <summary>静的シーン(奇数/偶数/グループ/レインボー)の再送間隔(ms)。0=再送しない（端末の保持に任せる）。</summary>
     public int RefreshIntervalMs { get; set; } = 0;
 
+    /// <summary>
+    /// 全機能（行ID／列ID／グループ／指定ID／レインボー）開始時、A2黒で全消灯してから点灯を始めるまでの
+    /// 「暗転保持」時間(ms)。仕様「機能実行時は一旦全消灯してから開始」を直前の点灯状態に関係なく確実に
+    /// 見せるための待ち。本待ちの間 SynchrolightAPI が A2黒を連続再送するため、直前の点灯（奇数/偶数の
+    /// 見え方の違い、ブロックID系で前の指定ID/グループが消え残る問題）を確実にクリアしてから点灯へ移れる。
+    /// 0=待たずに即点灯（＝消え残りが再発し得る）。既定300。
+    /// </summary>
+    public int ClearBlackoutMs { get; set; } = 300;
+
     /// <summary>連続送信時のパケット間ディレイ(ms)。送信機の処理余裕。</summary>
     public int InterPacketDelayMs { get; set; } = 5;
 
