@@ -11,13 +11,15 @@
     <!-- 画面右上・マニュアルに表示するバージョン。更新時はここを変更する。
          ※追加仕様20261101訂(doument/追加仕様.pptx)に準拠した正式版として 2.0.0 で配布。
            列ID操作確認を新設・ブロックID操作確認に指定ID点灯(エリア1)を追加。
-           レインボー検証機能は実装せず(UI非表示/コードは残置)。行＋列(十字)は仕様外のため非搭載。 -->
-    <Version>2.0.0</Version>
+           レインボー検証機能は実装せず(UI非表示/コードは残置)。行＋列(十字)は仕様外のため非搭載。
+         ※2.0.1 (2026-11-06): 機能変更なし。依存パッケージ Microsoft.Extensions.* を
+           10.0.3→10.0.14 へ更新（予防的なセキュリティ/メンテナンスパッチ）。 -->
+    <Version>2.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Generic Host(DI/Options/Logging/Configuration) 一式。IHttpClientFactory は使わず HttpClient を直接DIするため Microsoft.Extensions.Http は不要。 -->
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>
